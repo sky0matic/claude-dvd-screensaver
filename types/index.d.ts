@@ -6,6 +6,9 @@ export type Saver = {
   dy: 1 | -1
   color: number
   corners: number
+  /** The travel the start was picked for; -1 before one is picked. */
+  maxX: number
+  maxY: number
 }
 
 declare module 'claude-code' {

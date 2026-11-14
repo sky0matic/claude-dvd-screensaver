@@ -22,9 +22,19 @@ const LOGO_W = Math.max(...LOGO.map(line => line.length))
 const LOGO_H = LOGO.length
 const COLORS = ['magenta', 'cyan', 'yellow', 'green', 'red', 'blue', 'white'] as const
 
-const IDLE: Saver = { isOn: false, x: 0, y: 0, dx: 1, dy: 1, color: 0, corners: 0 }
+const IDLE: Saver = {
+  isOn: false,
+  x: 0,
+  y: 0,
+  dx: 1,
+  dy: 1,
+  color: 0,
+  corners: 0,
+  maxX: -1,
+  maxY: -1,
+}
 const saver = atom({ plugin: 'dvd-screensaver', key: 'saver' } as const, IDLE, {
-  shape: 'saver-1',
+  shape: 'saver-2',
 })
 const activity = atom({ plugin: 'dvd-screensaver', key: 'activity' } as const, [], {
   shape: 'activity-1',
@@ -47,6 +57,48 @@ let field = { w: 60, h: 10 }
 let pending: { cancel: () => void } | undefined
 let ticking: { cancel: () => void } | undefined
 
+type Motion = Pick<Saver, 'x' | 'y' | 'dx' | 'dy'>
+
+/** One tick of the bounce in a field of `maxX` by `maxY` cells of travel. */
+function step(m: Motion, maxX: number, maxY: number) {
+  let { x, y, dx, dy } = m
+  x += dx
+  y += dy
+  let hitX = false
+  let hitY = false
+  if (x <= 0 || x >= maxX) {
+    x = Math.min(Math.max(x, 0), maxX)
+    dx = dx === 1 ? -1 : 1
+    hitX = true
+  }
+  if (y <= 0 || y >= maxY) {
+    y = Math.min(Math.max(y, 0), maxY)
+    dy = dy === 1 ? -1 : 1
+    hitY = true
+  }
+  return { motion: { x, y, dx, dy }, hitX, hitY }
+}
+
+/**
+ * A random start that is sure to reach a corner: a random corner, heading
+ * inward, run forward a random number of ticks. The bounce is a loop that
+ * comes back to every point on it, so the logo comes back to that corner.
+ */
+function cornerReachableStart(maxX: number, maxY: number): Motion {
+  const right = Math.random() < 0.5
+  const bottom = Math.random() < 0.5
+  let m: Motion = {
+    x: right ? maxX : 0,
+    y: bottom ? maxY : 0,
+    dx: right ? -1 : 1,
+    dy: bottom ? -1 : 1,
+  }
+  // One full loop takes at most 2 * maxX * maxY ticks; go somewhere along it.
+  const ticks = Math.floor(Math.random() * Math.max(1, 2 * maxX * maxY))
+  for (let i = 0; i < ticks; i += 1) m = step(m, maxX, maxY).motion
+  return m
+}
+
 async function stop($: EngineInterface) {
   pending?.cancel()
   ticking?.cancel()
@@ -61,13 +113,11 @@ export const register: Register = on => {
     await stop($)
     await update($, activity, () => [])
     pending = $.clock.after(DELAY_MS, async () => {
+      // The start is picked on the first tick, once the box has been drawn
+      // and its size is known (maxX -1 says no start yet).
       await update($, saver, () => ({
         ...IDLE,
         isOn: true,
-        x: Math.floor(Math.random() * Math.max(1, field.w - LOGO_W)),
-        y: Math.floor(Math.random() * Math.max(1, field.h - LOGO_H)),
-        dx: Math.random() < 0.5 ? 1 : -1,
-        dy: Math.random() < 0.5 ? 1 : -1,
         color: Math.floor(Math.random() * COLORS.length),
       }))
       ticking = $.clock.every(FRAME_MS, () =>
@@ -75,27 +125,19 @@ export const register: Register = on => {
           if (!s.isOn) return s
           const maxX = Math.max(0, field.w - LOGO_W)
           const maxY = Math.max(0, field.h - LOGO_H)
-          let { x, y, dx, dy, color, corners } = s
-          x += dx
-          y += dy
-          let hitX = false
-          let hitY = false
-          if (x <= 0 || x >= maxX) {
-            x = Math.min(Math.max(x, 0), maxX)
-            dx = dx === 1 ? -1 : 1
-            hitX = true
+          // First tick, or the terminal was resized: the old path no longer
+          // fits, so pick a new corner-reachable start for this size.
+          if (s.maxX !== maxX || s.maxY !== maxY) {
+            return { ...s, ...cornerReachableStart(maxX, maxY), maxX, maxY }
           }
-          if (y <= 0 || y >= maxY) {
-            y = Math.min(Math.max(y, 0), maxY)
-            dy = dy === 1 ? -1 : 1
-            hitY = true
-          }
+          const { motion, hitX, hitY } = step(s, maxX, maxY)
+          let { color, corners } = s
           if (hitX || hitY) color = (color + 1) % COLORS.length
           if (hitX && hitY) {
             corners += 1
             void $.ui.toast('📀 It hit the corner!')
           }
-          return { ...s, x, y, dx, dy, color, corners }
+          return { ...s, ...motion, color, corners }
         }),
       )
     })
@@ -145,7 +187,7 @@ export const register: Register = on => {
         >
           <Box flexDirection="column" height={field.h}>
             <Box flexDirection="column" marginLeft={x} marginTop={y}>
-              {LOGO.map(line => (
+              {s.maxX >= 0 && LOGO.map(line => (
                 <Text color={COLORS[s.color]} bold wrap="truncate">
                   {line}
                 </Text>

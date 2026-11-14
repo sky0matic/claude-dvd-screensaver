@@ -1,13 +1,14 @@
-# dvd-screensaver
+# DVD Screensaver for Claude Code
 
 ![The screensaver bouncing above the prompt while a turn runs, with the latest tool calls listed underneath](assets/demo.gif)
 
-A Claude Code mod that brings back the classic bouncing DVD-logo screensaver.
+A Claude Code plugin that brings back the classic bouncing DVD-logo screensaver.
 When a turn has been running for more than 15 seconds, the spinner line
 grows into a box that fills the terminal above the prompt (the "working…"
 line stays underneath it). The logo drifts diagonally inside it, bounces off the edges,
 and changes color on every bounce. When it lands exactly in a corner, you get
-a toast. The box goes away as soon as the turn ends or you interrupt it.
+a pop-up. Every start is picked so that the logo is sure to hit a corner if
+the turn runs long enough. The box goes away as soon as the turn ends or you interrupt it.
 
 ## Install
 
@@ -33,7 +34,12 @@ calls, so you can still follow what Claude is doing.
 
 ## Develop it
 
-    claude --plugin-dir ./dvd-screensaver
+Clone the repository and start Claude Code with the plugin loaded from it:
+
+```
+git clone https://github.com/sky0matic/claude-dvd-screensaver
+claude --plugin-dir ./claude-dvd-screensaver
+```
 
 ## Tune it
 
