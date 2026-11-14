@@ -7,8 +7,8 @@ When a turn has been running for more than 15 seconds, the spinner line
 grows into a box that fills the terminal above the prompt (the "working…"
 line stays underneath it). The logo drifts diagonally inside it, bounces off the edges,
 and changes color on every bounce. When it lands exactly in a corner, you get
-a pop-up. Every start is picked so that the logo is sure to hit a corner if
-the turn runs long enough. The box goes away as soon as the turn ends or you interrupt it.
+a pop-up. Corner hits are rare on a big terminal, so one start in four is a
+lucky one that hits a corner within a minute; the rest are left to chance. The box goes away as soon as the turn ends or you interrupt it.
 
 ## Install
 
@@ -45,6 +45,8 @@ claude --plugin-dir ./claude-dvd-screensaver
 
 Edit the constants at the top of `hooks/register.tsx`: `DELAY_MS` sets how long
 a turn runs before the screensaver starts, `FRAME_MS` sets the animation speed,
+`CORNER_CHANCE` sets how often a start is a lucky one, `FIRST_CORNER_MS` sets
+how soon a lucky start hits its corner,
 `RESERVED_ROWS` sets how many rows are left free for the prompt, and
 `FEED_ROWS` sets how many tool calls the feed lists.
 

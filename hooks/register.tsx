@@ -9,6 +9,10 @@ const DELAY_MS = 15_000
 const FRAME_MS = 120
 /** Rows left for the spinner line, the prompt box and the hint under it. */
 const RESERVED_ROWS = 7
+/** Chance that a screensaver gets a lucky start, one that hits a corner soon. */
+const CORNER_CHANCE = 0.25
+/** How soon a lucky start hits its corner: a random time in this range. */
+const FIRST_CORNER_MS = [10_000, 60_000] as const
 /** Recent tool calls listed at the bottom of the box. */
 const FEED_ROWS = 3
 
@@ -79,23 +83,46 @@ function step(m: Motion, maxX: number, maxY: number) {
   return { motion: { x, y, dx, dy }, hitX, hitY }
 }
 
+/** Any start: a random point and a random diagonal heading. */
+function randomStart(maxX: number, maxY: number): Motion {
+  return {
+    x: Math.floor(Math.random() * (maxX + 1)),
+    y: Math.floor(Math.random() * (maxY + 1)),
+    dx: Math.random() < 0.5 ? 1 : -1,
+    dy: Math.random() < 0.5 ? 1 : -1,
+  }
+}
+
 /**
- * A random start that is sure to reach a corner: a random corner, heading
- * inward, run forward a random number of ticks. The bounce is a loop that
- * comes back to every point on it, so the logo comes back to that corner.
+ * A lucky start, one that hits a corner within FIRST_CORNER_MS. The bounce is a
+ * loop: from a corner, heading inward, it comes back to that same corner and
+ * heading after `period` ticks, a corner hit being the tick that arrives. So
+ * starting `period - k` ticks along the loop hits the corner after `k` ticks.
  */
-function cornerReachableStart(maxX: number, maxY: number): Motion {
+function luckyStart(maxX: number, maxY: number): Motion {
   const right = Math.random() < 0.5
   const bottom = Math.random() < 0.5
-  let m: Motion = {
+  const corner: Motion = {
     x: right ? maxX : 0,
     y: bottom ? maxY : 0,
     dx: right ? -1 : 1,
     dy: bottom ? -1 : 1,
   }
-  // One full loop takes at most 2 * maxX * maxY ticks; go somewhere along it.
-  const ticks = Math.floor(Math.random() * Math.max(1, 2 * maxX * maxY))
-  for (let i = 0; i < ticks; i += 1) m = step(m, maxX, maxY).motion
+  const isCorner = (m: Motion) =>
+    m.x === corner.x && m.y === corner.y && m.dx === corner.dx && m.dy === corner.dy
+
+  // The loop's length, at most lcm(2 * maxX, 2 * maxY) ticks.
+  let period = 0
+  let m = corner
+  do {
+    m = step(m, maxX, maxY).motion
+    period += 1
+  } while (!isCorner(m) && period < 4 * (maxX + 1) * (maxY + 1))
+
+  const [soonest, latest] = FIRST_CORNER_MS.map(ms => Math.round(ms / FRAME_MS))
+  const k = Math.min(period, soonest! + Math.floor(Math.random() * (latest! - soonest! + 1)))
+  m = corner
+  for (let i = 0; i < period - k; i += 1) m = step(m, maxX, maxY).motion
   return m
 }
 
@@ -126,9 +153,11 @@ export const register: Register = on => {
           const maxX = Math.max(0, field.w - LOGO_W)
           const maxY = Math.max(0, field.h - LOGO_H)
           // First tick, or the terminal was resized: the old path no longer
-          // fits, so pick a new corner-reachable start for this size.
+          // fits, so pick a new start for this size, now and then a lucky one.
           if (s.maxX !== maxX || s.maxY !== maxY) {
-            return { ...s, ...cornerReachableStart(maxX, maxY), maxX, maxY }
+            const start =
+              Math.random() < CORNER_CHANCE ? luckyStart(maxX, maxY) : randomStart(maxX, maxY)
+            return { ...s, ...start, maxX, maxY }
           }
           const { motion, hitX, hitY } = step(s, maxX, maxY)
           let { color, corners } = s
