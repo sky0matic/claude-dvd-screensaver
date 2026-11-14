@@ -39,3 +39,7 @@ Edit the constants at the top of `hooks/register.tsx`: `DELAY_MS` sets how long
 a turn runs before the screensaver starts, `FRAME_MS` sets the animation speed,
 `RESERVED_ROWS` sets how many rows are left free for the prompt, and
 `FEED_ROWS` sets how many tool calls the feed lists.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

@@ -2,5 +2,6 @@
   "name": "dvd-screensaver",
   "version": "0.1.0",
   "description": "A bouncing DVD-logo screensaver above the prompt while a turn runs long",
-  "types": "./types/index.d.ts"
+  "types": "./types/index.d.ts",
+  "license": "MIT"
 }
