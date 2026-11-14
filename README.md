@@ -1,5 +1,7 @@
 # dvd-screensaver
 
+![The screensaver bouncing above the prompt while a turn runs, with the latest tool calls listed underneath](assets/demo.gif)
+
 A Claude Code mod that brings back the classic bouncing DVD-logo screensaver.
 When a turn has been running for more than 15 seconds, the spinner line
 grows into a box that fills the terminal above the prompt (the "working…"
