@@ -1,5 +1,7 @@
 # DVD Screensaver for Claude Code
 
+[![Install the Claude Code plugin](https://img.shields.io/badge/Claude_Code-install_plugin-D97757)](#install)
+
 ![The screensaver bouncing above the prompt while a turn runs, with the latest tool calls listed underneath](plugin/assets/demo.gif)
 
 A Claude Code plugin for the terminal that brings back the classic bouncing
