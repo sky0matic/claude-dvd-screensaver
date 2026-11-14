@@ -6,9 +6,9 @@
   "license": "MIT",
   "scripts": {
     "prepare": "git config core.hooksPath .githooks",
-    "typecheck": "tsc -p .",
-    "test": "claude plugin test .",
-    "validate": "claude plugin validate .",
+    "typecheck": "tsc -p plugin",
+    "test": "claude plugin test plugin",
+    "validate": "claude plugin validate . && claude plugin validate plugin",
     "check": "npm run typecheck && npm run validate && npm test"
   },
   "devDependencies": {

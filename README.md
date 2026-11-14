@@ -1,14 +1,10 @@
 # DVD Screensaver for Claude Code
 
-![The screensaver bouncing above the prompt while a turn runs, with the latest tool calls listed underneath](assets/demo.gif)
+![The screensaver bouncing above the prompt while a turn runs, with the latest tool calls listed underneath](plugin/assets/demo.gif)
 
-A Claude Code plugin for the terminal that brings back the classic bouncing DVD-logo screensaver.
-When a turn has been running for more than 15 seconds, the spinner line
-grows into a box that fills the terminal above the prompt (the "working…"
-line stays underneath it). The logo drifts diagonally inside it, bounces off the edges,
-and changes color on every bounce. When it lands exactly in a corner, you get
-a pop-up. Corner hits are rare on a big terminal, so one start in four is a
-lucky one that hits a corner within a minute; the rest are left to chance. The box goes away as soon as the turn ends or you interrupt it.
+A Claude Code plugin for the terminal that brings back the classic bouncing
+DVD-logo screensaver while a long turn runs. See [plugin/README.md](plugin/README.md)
+for what it does and how to tune it.
 
 ## Install
 
@@ -18,45 +14,34 @@ At the prompt of a Claude Code terminal session:
 /plugin install dvd-screensaver --marketplace sky0matic/claude-dvd-screensaver
 ```
 
-Answer `y` to add the marketplace, then pick a scope. From a shell instead:
+Answer `y` to add the marketplace, then pick a scope. The screensaver draws in
+the Claude Code terminal only.
 
-```
-claude plugin install dvd-screensaver --marketplace sky0matic/claude-dvd-screensaver
-```
+## Repository layout
 
-The screensaver draws in the Claude Code terminal only. In the desktop app,
-VS Code or on mobile the plugin does nothing.
-
-## What you see
-
-While the screensaver is up, the bottom of the box lists the last three tool
-calls, so you can still follow what Claude is doing.
+- `plugin/` is the plugin itself: what the marketplace installs and what the
+  plugin directory reviews. Keep only what the plugin needs at runtime there,
+  plus its tests.
+- `.claude-plugin/marketplace.json` makes this repository a marketplace whose
+  one plugin is `./plugin`.
+- Everything else (`package.json`, `.githooks/`, `CLAUDE.md`, this README) is
+  development tooling and is not part of the plugin.
 
 ## Develop it
-
-Clone the repository and start Claude Code with the plugin loaded from it:
 
 ```
 git clone https://github.com/sky0matic/claude-dvd-screensaver
 cd claude-dvd-screensaver
 npm install
-claude --plugin-dir .
+claude --plugin-dir ./plugin
 ```
 
 `npm install` also turns on a git pre-commit hook that runs `npm run check`:
-the type-check (`npm run typecheck`), the plugin and marketplace validation
-(`npm run validate`) and the tests in `tests/` (`npm test`). The type-check
-uses the types Claude Code writes into `.claude-plugin/types/` when it loads
-the plugin, so start a session with `--plugin-dir` once before running it.
-
-## Tune it
-
-Edit the constants at the top of `hooks/register.tsx`: `DELAY_MS` sets how long
-a turn runs before the screensaver starts, `FRAME_MS` sets the animation speed,
-`CORNER_CHANCE` sets how often a start is a lucky one, `FIRST_CORNER_MS` sets
-how soon a lucky start hits its corner,
-`RESERVED_ROWS` sets how many rows are left free for the prompt, and
-`FEED_ROWS` sets how many tool calls the feed lists.
+the type-check (`npm run typecheck`), the marketplace and plugin validation
+(`npm run validate`) and the tests in `plugin/tests/` (`npm test`). The
+type-check uses the types Claude Code writes into `plugin/.claude-plugin/types/`
+when it loads the plugin, so start a session with `--plugin-dir ./plugin` once
+before running it.
 
 ## License
 

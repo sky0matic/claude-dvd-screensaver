@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "dvd-screensaver",
-      "source": "./"
+      "source": "./plugin"
     }
   ]
 }
