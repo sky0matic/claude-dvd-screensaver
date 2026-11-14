@@ -1,0 +1,4 @@
+#!/bin/sh
+# Runs the type-check, the plugin and marketplace validation and the tests.
+# Skip once with `git commit --no-verify`.
+exec npm run -s check

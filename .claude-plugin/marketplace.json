@@ -1,5 +1,13 @@
 {
   "name": "claude-dvd-screensaver",
-  "owner": { "name": "sky0matic" },
-  "plugins": [{ "name": "dvd-screensaver", "source": "./" }]
+  "description": "A bouncing DVD-logo screensaver for the Claude Code terminal while a long turn runs",
+  "owner": {
+    "name": "sky0matic"
+  },
+  "plugins": [
+    {
+      "name": "dvd-screensaver",
+      "source": "./"
+    }
+  ]
 }

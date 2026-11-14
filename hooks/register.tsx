@@ -179,6 +179,9 @@ export const register: Register = on => {
     await update($, activity, list => [...list, line].slice(-FEED_ROWS))
     return next(e)
   })
+    // The feed is decoration: if updating it fails, the tool call goes ahead.
+    // `next` is replay-safe here, so this never runs the tool twice.
+    .catch(($, e, next) => next(e))
 
   on('turn.complete', async ($, e, next) => {
     if (e.agentId === undefined) await stop($)

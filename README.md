@@ -2,7 +2,7 @@
 
 ![The screensaver bouncing above the prompt while a turn runs, with the latest tool calls listed underneath](assets/demo.gif)
 
-A Claude Code plugin that brings back the classic bouncing DVD-logo screensaver.
+A Claude Code plugin for the terminal that brings back the classic bouncing DVD-logo screensaver.
 When a turn has been running for more than 15 seconds, the spinner line
 grows into a box that fills the terminal above the prompt (the "working…"
 line stays underneath it). The logo drifts diagonally inside it, bounces off the edges,
@@ -24,8 +24,8 @@ Answer `y` to add the marketplace, then pick a scope. From a shell instead:
 claude plugin install dvd-screensaver --marketplace sky0matic/claude-dvd-screensaver
 ```
 
-In the desktop app: click + next to the prompt box, then Plugins, Add marketplace
-with `sky0matic/claude-dvd-screensaver`, then Add plugin.
+The screensaver draws in the Claude Code terminal only. In the desktop app,
+VS Code or on mobile the plugin does nothing.
 
 ## What you see
 
@@ -38,8 +38,16 @@ Clone the repository and start Claude Code with the plugin loaded from it:
 
 ```
 git clone https://github.com/sky0matic/claude-dvd-screensaver
-claude --plugin-dir ./claude-dvd-screensaver
+cd claude-dvd-screensaver
+npm install
+claude --plugin-dir .
 ```
+
+`npm install` also turns on a git pre-commit hook that runs `npm run check`:
+the type-check (`npm run typecheck`), the plugin and marketplace validation
+(`npm run validate`) and the tests in `tests/` (`npm test`). The type-check
+uses the types Claude Code writes into `.claude-plugin/types/` when it loads
+the plugin, so start a session with `--plugin-dir` once before running it.
 
 ## Tune it
 
