@@ -1,0 +1,5 @@
+{
+  "name": "claude-dvd-screensaver",
+  "owner": { "name": "sky0matic" },
+  "plugins": [{ "name": "dvd-screensaver", "source": "./" }]
+}
